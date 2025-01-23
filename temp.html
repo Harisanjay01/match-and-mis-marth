@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWB Comparison Tool</title>
+</head>
+<body>
+    <h1>AWB Number Comparison Tool</h1>
+    
+    <form id="upload-form" enctype="multipart/form-data">
+        <label for="file1">Upload First Excel File:</label>
+        <input type="file" id="file1" name="file1" required><br><br>
+        
+        <label for="file2">Upload Second Excel File:</label>
+        <input type="file" id="file2" name="file2" required><br><br>
+        
+        <button type="submit">Upload and Compare</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData();
+            formData.append('file1', document.getElementById('file1').files[0]);
+            formData.append('file2', document.getElementById('file2').files[0]);
+            
+            fetch('http://127.0.0.1:5000/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <h3>Matching AWB Numbers</h3>
+                    <a href="${data.matched}" download="matched.csv">Download Matched CSV</a>
+                    
+                    <h3>Mismatched AWB Numbers in File 1</h3>
+                    <a href="${data.mismatched_file1}" download="mismatched_file1.csv">Download Mismatched CSV (File 1)</a>
+                    
+                    <h3>Mismatched AWB Numbers in File 2</h3>
+                    <a href="${data.mismatched_file2}" download="mismatched_file2.csv">Download Mismatched CSV (File 2)</a>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
